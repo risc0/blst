@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - master
+      - risc0
     types: ["opened", "edited", "reopened", "synchronize"]
 
 permissions:
