@@ -235,6 +235,9 @@ fn main() {
     }
     if target_os.eq("zkvm") {
         cc.define("__ZKVM__", None);
+        file_vec.push(c_src_dir.join("risczero_blobs.s"));
+        let blobs_dir = env::var("RISC0_BLOBS").expect("RISC0_BLOBS env var");
+        cc.include(blobs_dir);
     }
 
     if !cfg!(debug_assertions) {

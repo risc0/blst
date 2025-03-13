@@ -5,7 +5,12 @@
  */
 
 #if defined(__ZKVM__)
-#include "risczero_blobs.h"
+extern const unsigned char
+    modadd256_blob[], modadd384_blob[],
+    modsub256_blob[], modsub384_blob[],
+    modmul256_blob[], modmul384_blob[],
+    modinv256_blob[], modinv384_blob[],
+    xxone_mul384_blob[];
 extern void sys_bigint2_3(const unsigned char*, const limb_t*, const limb_t*,
                           limb_t*);
 extern void sys_bigint2_4(const unsigned char*, const limb_t*, const limb_t*,
