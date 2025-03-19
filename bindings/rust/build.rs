@@ -235,6 +235,9 @@ fn main() {
     }
     if target_os.eq("zkvm") {
         cc.define("__ZKVM__", None);
+        if env::var("RISC0_UNCHECKED").is_ok() {
+            cc.define("__RISC0_UNCHECKED__", None);
+        }
     }
 
     if !cfg!(debug_assertions) {
