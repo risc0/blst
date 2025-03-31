@@ -17,6 +17,9 @@
 use blst::*;
 use blst::min_pk::SecretKey;
 
+#[allow(unused_imports)]
+use risc0_bigint2::field::*;
+
 risc0_zkvm::guest::entry!(main);
 
 fn test_sign_n_verify() {
