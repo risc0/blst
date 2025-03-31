@@ -1142,11 +1142,15 @@ static limb_t smul_2n(limb_t ret[], const limb_t u[], limb_t f,
 #if defined(__ZKVM__)
 inline void ct_inverse_mod_256(vec512 ret, const vec256 inp,
                                const vec256 mod, const vec256 modx) { //untested
-    r0bigint_modinv_256(inp, mod, ret);
+    vec256 tmp;
+    r0bigint_modinv_256(inp, mod, tmp);
+    r0bigint_modmul_256(tmp, BLS12_381_rRR, mod, ret);
 }
 inline void ct_inverse_mod_384(vec768 ret, const vec384 inp,
                                const vec384 mod, const vec384 modx) {
-    r0bigint_modinv_384(inp, mod, ret);
+    vec384 tmp;
+    r0bigint_modinv_384(inp, mod, tmp);
+    r0bigint_modmul_384(tmp, BLS12_381_RR, mod, ret);
 }
 #else
 static void ct_inverse_mod_n(limb_t ret[], const limb_t inp[],
