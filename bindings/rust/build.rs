@@ -233,6 +233,14 @@ fn main() {
         cc.define("__ELF__", None);
         cc.define("SCRATCH_LIMIT", "(45 * 1024)");
     }
+    if target_os.eq("zkvm") {
+        cc.define("__ZKVM__", None);
+        // Enable precompiles that are faster but can be misused insecurely
+        //if env::var("RISC0_UNCHECKED").is_ok() {
+        //    cc.define("__RISC0_UNCHECKED__", None);
+        //}
+    }
+
     if !cfg!(debug_assertions) {
         cc.opt_level(2);
     }

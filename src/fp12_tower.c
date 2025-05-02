@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifdef __RISC0_UNCHECKED__
+#include "risczero_utils.h"
+#endif
+
 #include "fields.h"
 
 /*
@@ -763,8 +767,13 @@ int blst_fp12_is_equal(const vec384fp12 a, const vec384fp12 b)
 
 int blst_fp12_is_one(const vec384fp12 a)
 {
-    return (int)(vec_is_equal(a[0][0], BLS12_381_Rx.p2, sizeof(a[0][0])) &
+    int r = (int)(vec_is_equal(a[0][0], BLS12_381_Rx.p2, sizeof(a[0][0])) &
                  vec_is_zero(a[0][1], sizeof(vec384fp12) - sizeof(a[0][0])));
+// bigint2 soundness: must succeed (used by c-kzg::pairings_verify)
+#ifdef __RISC0_UNCHECKED__
+    _must_assume(1 == r);
+#endif
+    return r;
 }
 
 const vec384fp12 *blst_fp12_one(void)

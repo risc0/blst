@@ -4,6 +4,90 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#if defined(__ZKVM__)
+#include "risczero_utils.h"
+
+#ifdef __RISC0_UNCHECKED__
+extern void risc0_bigint_modadd_256_unchecked(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modadd_384_unchecked(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modsub_256_unchecked(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modsub_384_unchecked(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modmul_256_unchecked(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modmul_384_unchecked(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modinv_256_unchecked(const limb_t*, const limb_t*,
+    limb_t*);
+extern void risc0_bigint_modinv_384_unchecked(const limb_t*, const limb_t*,
+    limb_t*);
+extern void risc0_bigint_extfield_xxone_mul_384_unchecked(const limb_t*,
+    const limb_t*, const limb_t*, const limb_t*, limb_t*);
+#define r0bigint_modadd_256 risc0_bigint_modadd_256_unchecked
+#define r0bigint_modadd_384 risc0_bigint_modadd_384_unchecked
+#define r0bigint_modsub_256 risc0_bigint_modsub_256_unchecked
+#define r0bigint_modsub_384 risc0_bigint_modsub_384_unchecked
+#define r0bigint_modmul_256 risc0_bigint_modmul_256_unchecked
+#define r0bigint_modmul_384 risc0_bigint_modmul_384_unchecked
+#define r0bigint_modinv_256 risc0_bigint_modinv_256_unchecked
+#define r0bigint_modinv_384 risc0_bigint_modinv_384_unchecked
+#define r0bigint_xxone_mul_384 risc0_bigint_extfield_xxone_mul_384_unchecked
+#else
+extern void risc0_bigint_modadd_256(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modadd_384(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modsub_256(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modsub_384(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modmul_256(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modmul_384(const limb_t*, const limb_t*,
+    const limb_t*, limb_t*);
+extern void risc0_bigint_modinv_256(const limb_t*, const limb_t*,
+    limb_t*);
+extern void risc0_bigint_modinv_384(const limb_t*, const limb_t*,
+    limb_t*);
+extern void risc0_bigint_extfield_xxone_mul_384(const limb_t*,
+    const limb_t*, const limb_t*, const limb_t*, limb_t*);
+#define r0bigint_modadd_256 risc0_bigint_modadd_256
+#define r0bigint_modadd_384 risc0_bigint_modadd_384
+#define r0bigint_modsub_256 risc0_bigint_modsub_256
+#define r0bigint_modsub_384 risc0_bigint_modsub_384
+#define r0bigint_modmul_256 risc0_bigint_modmul_256
+#define r0bigint_modmul_384 risc0_bigint_modmul_384
+#define r0bigint_modinv_256 risc0_bigint_modinv_256
+#define r0bigint_modinv_384 risc0_bigint_modinv_384
+#define r0bigint_xxone_mul_384 risc0_bigint_extfield_xxone_mul_384
+#endif
+
+const limb_t BLS12_381_PSQR[] = {
+    TO_LIMB_T(0x26aa00001c718e39), TO_LIMB_T(0x7ced6b1d76382eab),
+    TO_LIMB_T(0x162c338362113cfd), TO_LIMB_T(0x66bf91ed3e71b743),
+    TO_LIMB_T(0x292e85a87091a049), TO_LIMB_T(0x1d68619c86185c7b),
+    TO_LIMB_T(0xf53149330978ef01), TO_LIMB_T(0x50a62cfd16ddca6e),
+    TO_LIMB_T(0x66e59e49349e8bd0), TO_LIMB_T(0xe2dc90e50e7046b4),
+    TO_LIMB_T(0x4bd278eaa22f25e9), TO_LIMB_T(0x02a437a4b8c35fc7)};
+const vec384 R_INV_384 = {
+    TO_LIMB_T(0xf4d38259380b4820), TO_LIMB_T(0x7fe11274d898fafb),
+    TO_LIMB_T(0x343ea97914956dc8), TO_LIMB_T(0x1797ab1458a88de9),
+    TO_LIMB_T(0xed5e64273c4f538b), TO_LIMB_T(0x14fec701e8fb0ce9)};
+const vec256 R_INV_256 = {
+    TO_LIMB_T(0x13f75b69fe75c040), TO_LIMB_T(0xab6fca8f09dc705f),
+    TO_LIMB_T(0x7204078a4f77266a), TO_LIMB_T(0x1bbe869330009d57)};
+const vec256 THREE_256 = {
+    TO_LIMB_T(3ull), TO_LIMB_T(0ull),
+    TO_LIMB_T(0ull), TO_LIMB_T(0ull)};
+const vec384 THREE_384 = {
+    TO_LIMB_T(3ull), TO_LIMB_T(0ull), TO_LIMB_T(0ull),
+    TO_LIMB_T(0ull), TO_LIMB_T(0ull), TO_LIMB_T(0ull)};
+
+#endif //__ZKVM__
+
 #if LIMB_T_BITS==32
 typedef unsigned long long llimb_t;
 #endif
@@ -96,10 +180,37 @@ inline void sqr_mont_##bits(vec##bits ret, const vec##bits a, \
  */
 #define mul_mont_256 mul_mont_sparse_256
 #define sqr_mont_256 sqr_mont_sparse_256
+
+#if defined(__ZKVM__)
+inline void mul_mont_256(vec256 ret, const vec256 a, const vec256 b, const vec256 p,
+                         limb_t n0) {
+    vec256 tmp;
+    r0bigint_modmul_256(a, b, p, tmp);
+    r0bigint_modmul_256(tmp, R_INV_256, p, ret);
+}
+inline void sqr_mont_256(vec256 ret, const vec256 a, const vec256 p, limb_t n0) {
+    vec256 tmp;
+    r0bigint_modmul_256(a, a, p, tmp);
+    r0bigint_modmul_256(tmp, R_INV_256, p, ret);
+}
+inline void mul_mont_384(vec384 ret, const vec384 a, const vec384 b, const vec384 p,
+                         limb_t n0) {
+    vec384 tmp;
+    r0bigint_modmul_384(a, b, p, tmp);
+    r0bigint_modmul_384(tmp, R_INV_384, p, ret);
+}
+inline void sqr_mont_384(vec384 ret, const vec384 a, const vec384 p, limb_t n0) {
+    vec384 tmp;
+    r0bigint_modmul_384(a, a, p, tmp);
+    r0bigint_modmul_384(tmp, R_INV_384, p, ret);
+}
+#else
 MUL_MONT_IMPL(256)
+MUL_MONT_IMPL(384)
+#endif
+
 #undef mul_mont_256
 #undef sqr_mont_256
-MUL_MONT_IMPL(384)
 
 static void add_mod_n(limb_t ret[], const limb_t a[], const limb_t b[],
                       const limb_t p[], size_t n)
@@ -128,13 +239,21 @@ static void add_mod_n(limb_t ret[], const limb_t a[], const limb_t b[],
         ret[i] = (ret[i] & ~mask) | (tmp[i] & mask);
 }
 
+#if defined(__ZKVM__)
+inline void add_mod_256(vec256 ret, const vec256 a, const vec256 b, const vec256 p) {
+    r0bigint_modadd_256(a, b, p, ret);
+}
+inline void add_mod_384(vec384 ret, const vec384 a, const vec384 b, const vec384 p) {
+    r0bigint_modadd_384(a, b, p, ret);
+}
+#else
 #define ADD_MOD_IMPL(bits) \
 inline void add_mod_##bits(vec##bits ret, const vec##bits a, \
                            const vec##bits b, const vec##bits p) \
 {   add_mod_n(ret, a, b, p, NLIMBS(bits));   }
-
 ADD_MOD_IMPL(256)
 ADD_MOD_IMPL(384)
+#endif
 
 static void sub_mod_n(limb_t ret[], const limb_t a[], const limb_t b[],
                       const limb_t p[], size_t n)
@@ -160,14 +279,30 @@ static void sub_mod_n(limb_t ret[], const limb_t a[], const limb_t b[],
     }
 }
 
+#if defined(__ZKVM__)
+inline void sub_mod_256(vec256 ret, const vec256 a, const vec256 b, const vec256 p) {
+    r0bigint_modsub_256(a, b, p, ret);
+}
+inline void sub_mod_384(vec384 ret, const vec384 a, const vec384 b, const vec384 p) {
+    r0bigint_modsub_384(a, b, p, ret);
+}
+#else
 #define SUB_MOD_IMPL(bits) \
 inline void sub_mod_##bits(vec##bits ret, const vec##bits a, \
                            const vec##bits b, const vec##bits p) \
 {   sub_mod_n(ret, a, b, p, NLIMBS(bits));   }
-
 SUB_MOD_IMPL(256)
 SUB_MOD_IMPL(384)
+#endif
 
+#if defined(__ZKVM__)
+inline void mul_by_3_mod_256(vec256 ret, const vec256 a, const vec256 p) { //untested
+    r0bigint_modmul_256(a, THREE_256, p, ret);
+}
+inline void mul_by_3_mod_384(vec384 ret, const vec384 a, const vec384 p) {
+    r0bigint_modmul_384(a, THREE_384, p, ret);
+}
+#else
 static void mul_by_3_mod_n(limb_t ret[], const limb_t a[], const limb_t p[],
                            size_t n)
 {
@@ -220,7 +355,27 @@ inline void mul_by_3_mod_##bits(vec##bits ret, const vec##bits a, \
 
 MUL_BY_3_MOD_IMPL(256)
 MUL_BY_3_MOD_IMPL(384)
+#endif
 
+#if defined(__ZKVM__)
+inline void lshift_mod_256(vec256 ret, const vec256 a, size_t count,
+                           const vec256 p) { //untested
+    _must_assume((count != 0) && (count < 64));
+    const vec256 rhs = {
+        TO_LIMB_T(1ull << count), TO_LIMB_T(0ull),
+        TO_LIMB_T(0ull), TO_LIMB_T(0ull)};
+    r0bigint_modmul_256(a, rhs, p, ret);
+}
+inline void lshift_mod_384(vec384 ret, const vec384 a, size_t count,
+                           const vec384 p) {
+    _must_assume((count != 0) && (count < 64));
+    const vec384 rhs = {
+        TO_LIMB_T(1ull << count), TO_LIMB_T(0ull),
+        TO_LIMB_T(0ull), TO_LIMB_T(0ull),
+        TO_LIMB_T(0ull), TO_LIMB_T(0ull)};
+    r0bigint_modmul_384(a, rhs, p, ret);
+}
+#else
 static void lshift_mod_n(limb_t ret[], const limb_t a[], size_t count,
                          const limb_t p[], size_t n)
 {
@@ -260,6 +415,7 @@ inline void lshift_mod_##bits(vec##bits ret, const vec##bits a, size_t count, \
 
 LSHIFT_MOD_IMPL(256)
 LSHIFT_MOD_IMPL(384)
+#endif
 
 static void cneg_mod_n(limb_t ret[], const limb_t a[], bool_t flag,
                        const limb_t p[], size_t n)
@@ -491,12 +647,21 @@ inline void rshift_mod_##bits(vec##bits ret, const vec##bits a, size_t count, \
 RSHIFT_MOD_IMPL(256)
 RSHIFT_MOD_IMPL(384)
 
+#if defined(__ZKVM__)
+inline void div_by_2_mod_384(vec384 ret, const vec384 a, const vec384 p) {
+    static const vec384 TWO_INV_384 = {
+        TO_LIMB_T(0xdcff7fffffffd556), TO_LIMB_T(0x0f55ffff58a9ffff),
+        TO_LIMB_T(0xb39869507b587b12), TO_LIMB_T(0xb23ba5c279c2895f),
+        TO_LIMB_T(0x258dd3db21a5d66b), TO_LIMB_T(0xd0088f51cbff34d)};
+    r0bigint_modmul_384(a, TWO_INV_384, p, ret);
+}
+#else
 #define DIV_BY_2_MOD_IMPL(bits) \
 inline void div_by_2_mod_##bits(vec##bits ret, const vec##bits a, \
                                 const vec##bits p) \
 {   rshift_mod_n(ret, a, 1, p, NLIMBS(bits));   }
-
 DIV_BY_2_MOD_IMPL(384)
+#endif
 
 static limb_t sgn0_pty_mod_n(const limb_t a[], const limb_t p[], size_t n)
 {
@@ -563,6 +728,16 @@ inline limb_t sgn0_pty_mont_384x(const vec384x a, const vec384 p, limb_t n0)
     return sgn0_pty_mod_384x(tmp, p);
 }
 
+#if defined(__ZKVM__)
+void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b,
+                          const vec384 p, limb_t n0) {
+    vec384x tmp;
+    r0bigint_xxone_mul_384((const limb_t *)a,
+        (const limb_t *)b, p, BLS12_381_PSQR, (limb_t *)tmp);
+    r0bigint_modmul_384(tmp[0], R_INV_384, p, ret[0]);
+    r0bigint_modmul_384(tmp[1], R_INV_384, p, ret[1]);
+}
+#else
 void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b,
                           const vec384 p, limb_t n0)
 {
@@ -577,7 +752,31 @@ void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b,
     sub_mod_n(ret[1], bb, aa, p, NLIMBS(384));
     sub_mod_n(ret[1], ret[1], cc, p, NLIMBS(384));
 }
+#endif
 
+#if defined(__ZKVM__)
+void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count,
+                        const vec384 p, limb_t n0, const vec384 b) {
+    __builtin_assume(count != 0);
+    vec384 tmp;
+    r0bigint_modmul_384(a, a, p, tmp);
+    r0bigint_modmul_384(tmp, R_INV_384, p, ret);
+    while(--count) {
+        r0bigint_modmul_384(ret, ret, p, tmp);
+        r0bigint_modmul_384(tmp, R_INV_384, p, ret);
+    }
+    r0bigint_modmul_384(ret, b, p, tmp);
+    r0bigint_modmul_384(tmp, R_INV_384, p, ret);
+}
+void sqr_mont_382x(vec384x ret, const vec384x a,
+                          const vec384 p, limb_t n0) { //untested
+    vec384x tmp;
+    r0bigint_xxone_mul_384((const limb_t *)a,
+        (const limb_t *)a, p, BLS12_381_PSQR, (limb_t *)tmp);
+    r0bigint_modmul_384(tmp[0], R_INV_384, p, ret[0]);
+    r0bigint_modmul_384(tmp[1], R_INV_384, p, ret[1]);
+}
+#else
 /*
  * mul_mont_n without final conditional subtraction, which implies
  * that modulus is one bit short, which in turn means that there are
@@ -623,7 +822,6 @@ static void mul_mont_nonred_n(limb_t ret[], const limb_t a[], const limb_t b[],
 
     vec_copy(ret, tmp, sizeof(tmp)-sizeof(limb_t));
 }
-
 void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count,
                         const vec384 p, limb_t n0, const vec384 b)
 {
@@ -634,7 +832,6 @@ void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count,
     }
     mul_mont_n(ret, ret, b, p, n0, NLIMBS(384));
 }
-
 void sqr_mont_382x(vec384x ret, const vec384x a,
                           const vec384 p, limb_t n0)
 {
@@ -686,6 +883,7 @@ void sqr_mont_382x(vec384x ret, const vec384x a,
         carry = (limb_t)(limbx >> LIMB_T_BITS);
     }
 }
+#endif
 
 #if defined(__GNUC__) || defined(__clang__)
 # define MSB(x) ({ limb_t ret = (x) >> (LIMB_T_BITS-1); launder(ret); ret; })
@@ -941,6 +1139,16 @@ static limb_t smul_2n(limb_t ret[], const limb_t u[], limb_t f,
     return hi;
 }
 
+#if defined(__ZKVM__)
+inline void ct_inverse_mod_256(vec512 ret, const vec256 inp,
+                               const vec256 mod, const vec256 modx) { //untested
+    r0bigint_modinv_256(inp, mod, ret);
+}
+inline void ct_inverse_mod_384(vec768 ret, const vec384 inp,
+                               const vec384 mod, const vec384 modx) {
+    r0bigint_modinv_384(inp, mod, ret);
+}
+#else
 static void ct_inverse_mod_n(limb_t ret[], const limb_t inp[],
                              const limb_t mod[], const limb_t modx[], size_t n)
 {
@@ -992,6 +1200,7 @@ inline void ct_inverse_mod_##bits(vec##bits2 ret, const vec##bits inp, \
 
 CT_INVERSE_MOD_IMPL(256, 512)
 CT_INVERSE_MOD_IMPL(384, 768)
+#endif
 
 /*
  * Copy of inner_loop_n above, but with |L| updates.
