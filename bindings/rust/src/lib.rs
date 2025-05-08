@@ -10,6 +10,9 @@
 
 extern crate alloc;
 
+#[allow(unused_imports)]
+use risc0_bigint2::field as _;
+
 use alloc::boxed::Box;
 use alloc::vec;
 use alloc::vec::Vec;
@@ -780,9 +783,7 @@ macro_rules! sig_variant_impl {
         // of the secret key material.
         impl<'a> From<&'a SecretKey> for &'a blst_scalar {
             fn from(sk: &'a SecretKey) -> Self {
-                unsafe {
-                    transmute::<&SecretKey, Self>(sk)
-                }
+                unsafe { transmute::<&SecretKey, Self>(sk) }
             }
         }
 
@@ -1717,8 +1718,7 @@ macro_rules! sig_variant_impl {
 
             fn add(&self) -> Self::Output {
                 Self::Output {
-                    point: unsafe { transmute::<&[_], &[$pk_aff]>(self) }
-                        .add(),
+                    point: unsafe { transmute::<&[_], &[$pk_aff]>(self) }.add(),
                 }
             }
 
