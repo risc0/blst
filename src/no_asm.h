@@ -1141,12 +1141,26 @@ static limb_t smul_2n(limb_t ret[], const limb_t u[], limb_t f,
 
 #if defined(__ZKVM__)
 inline void ct_inverse_mod_256(vec512 ret, const vec256 inp,
-                               const vec256 mod, const vec256 modx) { //untested
-    r0bigint_modinv_256(inp, mod, ret);
+                               const vec256 mod, const vec256 modx) {
+    // ct_inverse_mod_n returns zero when inp is zero
+    if (vec_is_zero(inp, sizeof(*inp))) {
+        vec_zero(ret, sizeof(*ret));
+    } else {
+        r0bigint_modinv_256(inp, mod, ret);
+        // set the upper 256 bits of ret to zero
+        vec_zero(ret+sizeof(*ret)/2, sizeof(*ret)/2);
+    }
 }
 inline void ct_inverse_mod_384(vec768 ret, const vec384 inp,
                                const vec384 mod, const vec384 modx) {
-    r0bigint_modinv_384(inp, mod, ret);
+    // ct_inverse_mod_n allows zero as input
+    if (vec_is_zero(inp, sizeof(*inp))) {
+        vec_zero(ret, sizeof(*ret));
+    } else {
+        r0bigint_modinv_384(inp, mod, ret);
+        // set the upper 384 bits of ret to zero
+        vec_zero(ret+sizeof(*ret)/2, sizeof(*ret)/2);
+    }
 }
 #else
 static void ct_inverse_mod_n(limb_t ret[], const limb_t inp[],
