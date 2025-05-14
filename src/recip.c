@@ -91,10 +91,14 @@ static void flt_reciprocal_fp2(vec384x out, const vec384x inp)
 static void reciprocal_fp(vec384 out, const vec384 inp)
 {
 #ifdef __ZKVM__
-    // compute imp^-1 = (v * R)^-1
-    r0bigint_modinv_384(inp, BLS12_381_P, out);
-    // compute (v * R)^-1 * R^2 = v^-1 * R
-    r0bigint_modmul_384(out, BLS12_381_RR, BLS12_381_P, out);
+    if (vec_is_zero(inp, sizeof(vec384))) {
+        vec_zero(out, sizeof(vec384));
+    } else {
+        // compute imp^-1 = (v * R)^-1
+        r0bigint_modinv_384(inp, BLS12_381_P, out);
+        // compute (v * R)^-1 * R^2 = v^-1 * R
+        r0bigint_modmul_384(out, BLS12_381_RR, BLS12_381_P, out);
+    }
 #else //__ZKVM__
     static const vec384 Px8 = {    /* left-aligned value of the modulus */
         TO_LIMB_T(0xcff7fffffffd5558), TO_LIMB_T(0xf55ffff58a9ffffd),
@@ -162,10 +166,14 @@ void blst_fp2_eucl_inverse(vec384x out, const vec384x inp)
 static void reciprocal_fr(vec256 out, const vec256 inp)
 {
 #ifdef __ZKVM__
-    // compute imp^-1 = (v * R)^-1
-    r0bigint_modinv_256(inp, BLS12_381_r, out);
-    // compute (v * R)^-1 * R^2 = v^-1 * R
-    r0bigint_modmul_256(out, BLS12_381_rRR, BLS12_381_r, out);
+    if (vec_is_zero(inp, sizeof(vec256))) {
+        vec_zero(out, sizeof(vec256));
+    } else {
+        // compute imp^-1 = (v * R)^-1
+        r0bigint_modinv_256(inp, BLS12_381_r, out);
+        // compute (v * R)^-1 * R^2 = v^-1 * R
+        r0bigint_modmul_256(out, BLS12_381_rRR, BLS12_381_r, out);
+    }
 #else //__ZKVM__
     static const vec256 rx2 = { /* left-aligned value of the modulus */
         TO_LIMB_T(0xfffffffe00000002), TO_LIMB_T(0xa77b4805fffcb7fd),
