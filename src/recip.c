@@ -4,6 +4,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+ #ifdef __ZKVM__
+ #include "risczero_utils.h"
+
+ #ifdef __RISC0_UNCHECKED__
+ extern void risc0_bigint_modmul_256_unchecked(const limb_t*, const limb_t*,
+     const limb_t*, limb_t*);
+ extern void risc0_bigint_modmul_384_unchecked(const limb_t*, const limb_t*,
+     const limb_t*, limb_t*);
+ extern void risc0_bigint_modinv_256_unchecked(const limb_t*, const limb_t*,
+     limb_t*);
+ extern void risc0_bigint_modinv_384_unchecked(const limb_t*, const limb_t*,
+     limb_t*);
+ #define r0bigint_modmul_256 risc0_bigint_modmul_256_unchecked
+ #define r0bigint_modmul_384 risc0_bigint_modmul_384_unchecked
+ #define r0bigint_modinv_256 risc0_bigint_modinv_256_unchecked
+ #define r0bigint_modinv_384 risc0_bigint_modinv_384_unchecked
+ #else // __RISC0_UNCHECKED__
+ extern void risc0_bigint_modmul_256(const limb_t*, const limb_t*,
+     const limb_t*, limb_t*);
+ extern void risc0_bigint_modmul_384(const limb_t*, const limb_t*,
+     const limb_t*, limb_t*);
+ extern void risc0_bigint_modinv_256(const limb_t*, const limb_t*,
+     limb_t*);
+ extern void risc0_bigint_modinv_384(const limb_t*, const limb_t*,
+     limb_t*);
+ #define r0bigint_modmul_256 risc0_bigint_modmul_256
+ #define r0bigint_modmul_384 risc0_bigint_modmul_384
+ #define r0bigint_modinv_256 risc0_bigint_modinv_256
+ #define r0bigint_modinv_384 risc0_bigint_modinv_384
+ #endif // __RISC0_UNCHECKED__
+
+#endif //__ZKVM__
+
 #include "fields.h"
 
 #ifdef __OPTIMIZE_SIZE__
@@ -57,6 +90,16 @@ static void flt_reciprocal_fp2(vec384x out, const vec384x inp)
 
 static void reciprocal_fp(vec384 out, const vec384 inp)
 {
+#ifdef __ZKVM__
+    if (vec_is_zero(inp, sizeof(vec384))) {
+        vec_zero(out, sizeof(vec384));
+    } else {
+        // compute imp^-1 = (v * R)^-1
+        r0bigint_modinv_384(inp, BLS12_381_P, out);
+        // compute (v * R)^-1 * R^2 = v^-1 * R
+        r0bigint_modmul_384(out, BLS12_381_RR, BLS12_381_P, out);
+    }
+#else //__ZKVM__
     static const vec384 Px8 = {    /* left-aligned value of the modulus */
         TO_LIMB_T(0xcff7fffffffd5558), TO_LIMB_T(0xf55ffff58a9ffffd),
         TO_LIMB_T(0x39869507b587b120), TO_LIMB_T(0x23ba5c279c2895fb),
@@ -89,6 +132,7 @@ static void reciprocal_fp(vec384 out, const vec384 inp)
     vec_copy(out, temp.r[0], sizeof(vec384));
 #endif
 #undef RRx4
+#endif //__ZKVM__
 }
 
 void blst_fp_inverse(vec384 out, const vec384 inp)
@@ -121,6 +165,16 @@ void blst_fp2_eucl_inverse(vec384x out, const vec384x inp)
 
 static void reciprocal_fr(vec256 out, const vec256 inp)
 {
+#ifdef __ZKVM__
+    if (vec_is_zero(inp, sizeof(vec256))) {
+        vec_zero(out, sizeof(vec256));
+    } else {
+        // compute imp^-1 = (v * R)^-1
+        r0bigint_modinv_256(inp, BLS12_381_r, out);
+        // compute (v * R)^-1 * R^2 = v^-1 * R
+        r0bigint_modmul_256(out, BLS12_381_rRR, BLS12_381_r, out);
+    }
+#else //__ZKVM__
     static const vec256 rx2 = { /* left-aligned value of the modulus */
         TO_LIMB_T(0xfffffffe00000002), TO_LIMB_T(0xa77b4805fffcb7fd),
         TO_LIMB_T(0x6673b0101343b00a), TO_LIMB_T(0xe7db4ea6533afa90),
@@ -130,6 +184,7 @@ static void reciprocal_fr(vec256 out, const vec256 inp)
     ct_inverse_mod_256(temp, inp, BLS12_381_r, rx2);
     redc_mont_256(out, temp, BLS12_381_r, r0);
     mul_mont_sparse_256(out, out, BLS12_381_rRR, BLS12_381_r, r0);
+#endif //__ZKVM__
 }
 
 void blst_fr_inverse(vec256 out, const vec256 inp)
