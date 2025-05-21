@@ -94,10 +94,11 @@ static void reciprocal_fp(vec384 out, const vec384 inp)
     if (vec_is_zero(inp, sizeof(vec384))) {
         vec_zero(out, sizeof(vec384));
     } else {
+        vec384 tmp;
         // compute imp^-1 = (v * R)^-1
-        r0bigint_modinv_384(inp, BLS12_381_P, out);
+        r0bigint_modinv_384(inp, BLS12_381_P, tmp);
         // compute (v * R)^-1 * R^2 = v^-1 * R
-        r0bigint_modmul_384(out, BLS12_381_RR, BLS12_381_P, out);
+        r0bigint_modmul_384(tmp, BLS12_381_RR, BLS12_381_P, out);
     }
 #else //__ZKVM__
     static const vec384 Px8 = {    /* left-aligned value of the modulus */
@@ -169,10 +170,11 @@ static void reciprocal_fr(vec256 out, const vec256 inp)
     if (vec_is_zero(inp, sizeof(vec256))) {
         vec_zero(out, sizeof(vec256));
     } else {
+        vec256 tmp;
         // compute imp^-1 = (v * R)^-1
-        r0bigint_modinv_256(inp, BLS12_381_r, out);
+        r0bigint_modinv_256(inp, BLS12_381_r, tmp);
         // compute (v * R)^-1 * R^2 = v^-1 * R
-        r0bigint_modmul_256(out, BLS12_381_rRR, BLS12_381_r, out);
+        r0bigint_modmul_256(tmp, BLS12_381_rRR, BLS12_381_r, out);
     }
 #else //__ZKVM__
     static const vec256 rx2 = { /* left-aligned value of the modulus */
