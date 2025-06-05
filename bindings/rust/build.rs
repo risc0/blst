@@ -41,6 +41,7 @@ fn main() {
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+    let target_vendor = env::var("CARGO_CFG_TARGET_VENDOR").unwrap();
     let target_family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap_or_default();
 
     let target_no_std = target_os.eq("none")
@@ -233,7 +234,10 @@ fn main() {
         cc.define("__ELF__", None);
         cc.define("SCRATCH_LIMIT", "(45 * 1024)");
     }
-    if target_os =="zkvm" && target_arch == "riscv32" {
+    if target_os == "zkvm"
+        && target_arch == "riscv32"
+        && target_vendor == "risc0"
+    {
         cc.define("__R0VM__", None);
     }
     cc.files(&file_vec).compile("blst");
