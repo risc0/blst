@@ -553,10 +553,10 @@ ALWAYS_INLINE void from_mont_384(vec384 ret, const vec384 a, const vec384 p,
         from_mont_n(ret, a, p, n0, NLIMBS(384));
     }
 }
-#else  // __ZKVM
+#else  // __R0VM__
 FROM_MONT_IMPL(256)
 FROM_MONT_IMPL(384)
-#endif // __ZKVM
+#endif // __R0VM__
 
 static void redc_mont_n(limb_t ret[], const limb_t a[],
                         const limb_t p[], limb_t n0, size_t n)
@@ -653,13 +653,13 @@ ALWAYS_INLINE void div_by_2_mod_384(vec384 ret, const vec384 a,
         rshift_mod_n(ret, a, 1, p, NLIMBS(384));
     }
 }
-#else // __ZKVM
+#else // __R0VM__
 #define DIV_BY_2_MOD_IMPL(bits) \
 inline void div_by_2_mod_##bits(vec##bits ret, const vec##bits a, \
                                 const vec##bits p) \
 {   rshift_mod_n(ret, a, 1, p, NLIMBS(bits));   }
 DIV_BY_2_MOD_IMPL(384)
-#endif // __ZKVM
+#endif // __R0VM__
 
 static limb_t sgn0_pty_mod_n(const limb_t a[], const limb_t p[], size_t n)
 {
