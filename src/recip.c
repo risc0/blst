@@ -177,7 +177,7 @@ static void reciprocal_fr(vec256 out, const vec256 inp)
         // compute (v * R)^-1 * R^2 mod r = v^-1 * R mod r
         risc0_modmul_256(out, BLS12_381_rRR, BLS12_381_r, out);
     }
-#else //__R0VM__
+#else  //__R0VM__
     static const vec256 rx2 = { /* left-aligned value of the modulus */
         TO_LIMB_T(0xfffffffe00000002), TO_LIMB_T(0xa77b4805fffcb7fd),
         TO_LIMB_T(0x6673b0101343b00a), TO_LIMB_T(0xe7db4ea6533afa90),
