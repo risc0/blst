@@ -755,8 +755,8 @@ ALWAYS_INLINE void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b,
     }
 }
 #else  // __R0VM__
-ALWAYS_INLINE void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b,
-                                 const vec384 p, limb_t n0) {
+inline void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b,
+                          const vec384 p, limb_t n0) {
     mul_mont_384x_c_impl(ret, a, b, p, n0);
 }
 #endif // __R0VM__
