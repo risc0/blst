@@ -31,5 +31,5 @@
 # include "cpuid.c"
 #endif
 #ifdef __R0VM__
-# include "risc0_consts.c"
+#include "risc0_consts.c"
 #endif

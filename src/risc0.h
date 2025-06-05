@@ -5,32 +5,32 @@
 #include "vect.h"
 
 #if defined(_MSC_VER)
-    #define ALWAYS_INLINE __forceinline
+#define ALWAYS_INLINE __forceinline
 #elif defined(__GNUC__) || defined(__clang__)
-    #define ALWAYS_INLINE __attribute__((always_inline)) inline
+#define ALWAYS_INLINE __attribute__((always_inline)) inline
 // Fallback for other compilers (just use standard inline)
 #else
-    #define ALWAYS_INLINE inline
+#define ALWAYS_INLINE inline
 #endif
 
 extern void risc0_bigint_modadd_256_unchecked(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
+                                              const limb_t*, limb_t*);
 extern void risc0_bigint_modadd_384_unchecked(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
+                                              const limb_t*, limb_t*);
 extern void risc0_bigint_modsub_256_unchecked(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
+                                              const limb_t*, limb_t*);
 extern void risc0_bigint_modsub_384_unchecked(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
+                                              const limb_t*, limb_t*);
 extern void risc0_bigint_modmul_256_unchecked(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
+                                              const limb_t*, limb_t*);
 extern void risc0_bigint_modmul_384_unchecked(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
+                                              const limb_t*, limb_t*);
 extern void risc0_bigint_modinv_256_unchecked(const limb_t*, const limb_t*,
-    limb_t*);
+                                              limb_t*);
 extern void risc0_bigint_modinv_384_unchecked(const limb_t*, const limb_t*,
-    limb_t*);
-extern void risc0_bigint_extfield_xxone_mul_384_unchecked(const limb_t*,
-    const limb_t*, const limb_t*, const limb_t*, limb_t*);
+                                              limb_t*);
+extern void risc0_bigint_extfield_xxone_mul_384_unchecked(
+    const limb_t*, const limb_t*, const limb_t*, const limb_t*, limb_t*);
 #define risc0_modadd_256_unchecked risc0_bigint_modadd_256_unchecked
 #define risc0_modadd_384_unchecked risc0_bigint_modadd_384_unchecked
 #define risc0_modsub_256_unchecked risc0_bigint_modsub_256_unchecked
@@ -39,26 +39,26 @@ extern void risc0_bigint_extfield_xxone_mul_384_unchecked(const limb_t*,
 #define risc0_modmul_384_unchecked risc0_bigint_modmul_384_unchecked
 #define risc0_modinv_256_unchecked risc0_bigint_modinv_256_unchecked
 #define risc0_modinv_384_unchecked risc0_bigint_modinv_384_unchecked
-#define risc0_xxone_mul_384_unchecked risc0_bigint_extfield_xxone_mul_384_unchecked
+#define risc0_xxone_mul_384_unchecked                                          \
+    risc0_bigint_extfield_xxone_mul_384_unchecked
 
-extern void risc0_bigint_modadd_256(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
-extern void risc0_bigint_modadd_384(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
-extern void risc0_bigint_modsub_256(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
-extern void risc0_bigint_modsub_384(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
-extern void risc0_bigint_modmul_256(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
-extern void risc0_bigint_modmul_384(const limb_t*, const limb_t*,
-    const limb_t*, limb_t*);
-extern void risc0_bigint_modinv_256(const limb_t*, const limb_t*,
-    limb_t*);
-extern void risc0_bigint_modinv_384(const limb_t*, const limb_t*,
-    limb_t*);
-extern void risc0_bigint_extfield_xxone_mul_384(const limb_t*,
-    const limb_t*, const limb_t*, const limb_t*, limb_t*);
+extern void risc0_bigint_modadd_256(const limb_t*, const limb_t*, const limb_t*,
+                                    limb_t*);
+extern void risc0_bigint_modadd_384(const limb_t*, const limb_t*, const limb_t*,
+                                    limb_t*);
+extern void risc0_bigint_modsub_256(const limb_t*, const limb_t*, const limb_t*,
+                                    limb_t*);
+extern void risc0_bigint_modsub_384(const limb_t*, const limb_t*, const limb_t*,
+                                    limb_t*);
+extern void risc0_bigint_modmul_256(const limb_t*, const limb_t*, const limb_t*,
+                                    limb_t*);
+extern void risc0_bigint_modmul_384(const limb_t*, const limb_t*, const limb_t*,
+                                    limb_t*);
+extern void risc0_bigint_modinv_256(const limb_t*, const limb_t*, limb_t*);
+extern void risc0_bigint_modinv_384(const limb_t*, const limb_t*, limb_t*);
+extern void risc0_bigint_extfield_xxone_mul_384(const limb_t*, const limb_t*,
+                                                const limb_t*, const limb_t*,
+                                                limb_t*);
 #define risc0_modadd_256 risc0_bigint_modadd_256
 #define risc0_modadd_384 risc0_bigint_modadd_384
 #define risc0_modsub_256 risc0_bigint_modsub_256
@@ -69,8 +69,9 @@ extern void risc0_bigint_extfield_xxone_mul_384(const limb_t*,
 #define risc0_modinv_384 risc0_bigint_modinv_384
 #define risc0_xxone_mul_384 risc0_bigint_extfield_xxone_mul_384
 
-extern void sys_sha_buffer(unsigned int *out_state, const unsigned int *in_state,
-    const unsigned char *buf, unsigned int count);
+extern void sys_sha_buffer(unsigned int* out_state,
+                           const unsigned int* in_state,
+                           const unsigned char* buf, unsigned int count);
 #define risc0_sha256_buffer sys_sha_buffer
 
 // Montgomery constant R^-1 mod r (for the 256-bit scalar field r)
