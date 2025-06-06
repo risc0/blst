@@ -239,6 +239,7 @@ fn main() {
         && target_vendor == "risc0"
     {
         cc.define("__R0VM__", None);
+        println!("cargo:rustc-cfg=feature=\"no-threads\"");
     }
     cc.files(&file_vec).compile("blst");
 
