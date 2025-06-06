@@ -9,9 +9,31 @@ on:
     - '**'
   pull_request:
     branches:
-    - master
+    - risc0
 
 jobs:
+  r0vm:
+    runs-on: [ self-hosted, cluster, Linux, nvidia_rtx_4000_ada ]
+    env:
+      NVCC_APPEND_FLAGS: -arch=sm_89
+      RUST_BACKTRACE: full
+    steps:
+      - uses: actions/checkout@v4
+      - uses: risc0/risc0/.github/actions/cuda@352dea62857ba57331053cd0986a12c1a4708732
+      - uses: risc0/risc0/.github/actions/rustup@352dea62857ba57331053cd0986a12c1a4708732
+      - uses: risc0/risc0/.github/actions/sccache@352dea62857ba57331053cd0986a12c1a4708732
+      - name: install rzup
+        run: |
+          curl -L https://risczero.com/install | bash
+          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+        shell: bash
+      - name: install rzup components
+        run: rzup install --verbose
+        shell: bash
+      - name: cargo test
+        run: cargo test -F r0vm-tests r0vm
+        working-directory: bindings/rust
+
   rust-n-go:
     runs-on: ${{ matrix.os }}
 
