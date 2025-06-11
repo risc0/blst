@@ -84,6 +84,45 @@ fn bls(seed: [u8; 32], n: usize) -> anyhow::Result<()> {
     Ok(())
 }
 
+pub fn kzg(n: u8) -> anyhow::Result<()> {
+    let blobs = (0..n)
+        .map(|i| Blob::new([i; BYTES_PER_BLOB]))
+        .collect::<Vec<_>>();
+
+    // compute KZG proofs
+    let kzg_settings = c_kzg::ethereum_kzg_settings(0);
+
+    let commits = blobs
+        .iter()
+        .map(|b| kzg_settings.blob_to_kzg_commitment(b).unwrap().to_bytes())
+        .collect::<Vec<_>>();
+    let proofs = zip(blobs.iter(), commits.iter())
+        .map(|(b, c)| {
+            kzg_settings
+                .compute_blob_kzg_proof(b, c)
+                .unwrap()
+                .to_bytes()
+        })
+        .collect::<Vec<_>>();
+
+    let blobs = blobs.iter().map(|b| b.to_vec()).collect::<Vec<_>>();
+    let commits = commits.iter().map(|b| b.to_vec()).collect::<Vec<_>>();
+    let proofs = proofs.iter().map(|b| b.to_vec()).collect::<Vec<_>>();
+    let env = ExecutorEnv::builder()
+        .write(&blobs)?
+        .write(&commits)?
+        .write(&proofs)?
+        .build()?;
+
+    println!("Generating proof...");
+    let prove_info = default_prover().prove(env, KZG_ELF)?;
+
+    println!("Verifying proof...");
+    prove_info.receipt.verify(KZG_ID)?;
+
+    Ok(())
+}
+
 #[test]
 #[cfg_attr(not(feature = "cuda"), ignore = "proving takes a long time")]
 fn r0vm_prove_bls_signatures() -> anyhow::Result<()> {
