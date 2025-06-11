@@ -1,0 +1,42 @@
+name: risc0
+
+on:
+  merge_group:
+  pull_request:
+    branches: [ risc0, "release-*" ]
+  workflow_dispatch:
+
+  # Temporarily add this push trigger for testing
+  push:
+    branches:
+      - wollac/perf
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  r0vm-tests:
+    runs-on: [ self-hosted, prod, Linux, gpu ]
+    env:
+      RUST_LOG: info
+      RUST_BACKTRACE: full
+      RISC0_INFO: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: risc0/risc0/.github/actions/cuda@352dea62857ba57331053cd0986a12c1a4708732
+      - uses: risc0/risc0/.github/actions/rustup@352dea62857ba57331053cd0986a12c1a4708732
+      - name: install rzup
+        run: |
+          curl -L https://risczero.com/install | bash
+          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+        shell: bash
+      - name: install risc0 toolchain
+        run: rzup install --verbose
+        shell: bash
+      - name: cargo test
+        run: cargo test --release -F cuda
+        working-directory: bindings/rust

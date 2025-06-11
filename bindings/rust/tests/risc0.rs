@@ -1,5 +1,3 @@
-#![cfg(feature = "r0vm-tests")]
-
 use anyhow::ensure;
 use blst::{min_pk, min_sig, BLST_ERROR};
 use guests::{BLS_ELF, BLS_ID};
@@ -8,6 +6,7 @@ use rand_chacha::{
     ChaCha20Rng,
 };
 use risc0_zkvm::{default_prover, ExecutorEnv};
+use test_log::test;
 use tracing_subscriber::fmt::writer::TestWriter;
 
 // Define a message and DSTs
@@ -35,9 +34,10 @@ fn bls(seed: [u8; 32], n: usize) -> anyhow::Result<()> {
         .write(&sk_be_bytes_vec)?
         .build()?;
 
-    println!("Generating proof...");
-    let prove_info = default_prover().prove(env, BLS_ELF)?;
-    println!("Proof finished: {:?}", prove_info.stats);
+    let prover = default_prover();
+
+    println!("Generating proof ({})...", prover.get_name());
+    let prove_info = prover.prove(env, BLS_ELF)?;
 
     println!("Verifying proof...");
     prove_info.receipt.verify(BLS_ID)?;
@@ -85,6 +85,7 @@ fn bls(seed: [u8; 32], n: usize) -> anyhow::Result<()> {
 }
 
 #[test]
+#[cfg_attr(not(feature = "cuda"), ignore = "proving takes a long time")]
 fn r0vm_prove_bls_signatures() -> anyhow::Result<()> {
-    bls([0u8; 32], 2)
+    bls([0u8; 32], 3)
 }
