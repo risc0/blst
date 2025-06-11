@@ -3,13 +3,8 @@ name: risc0
 on:
   merge_group:
   pull_request:
-    branches: [ risc0, "release-*" ]
+    branches: [ master, risc0, "release-*" ]
   workflow_dispatch:
-
-  # Temporarily add this push trigger for testing
-  push:
-    branches:
-      - wollac/perf
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
