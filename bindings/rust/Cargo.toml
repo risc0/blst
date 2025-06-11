@@ -38,8 +38,8 @@ force-adx = []
 no-threads = []
 # Add support for serializing SecretKey, not suitable for production.
 serde-secret = ["serde"]
-
-r0vm-tests = []
+# Run the R0VM tests on NVIDIA GPUs using the CUDA
+cuda = ["risc0-zkvm/cuda"]
 
 [build-dependencies]
 cc = "1.0"
@@ -65,6 +65,7 @@ rand_chacha = "0.3"
 #ppv-lite86 = "=0.2.17"
 risc0-zkvm = { version = "2.0" }
 rmp-serde = "1.1.1"
+test-log = { version = "0.2", features = ["trace"] }
 tracing-subscriber = { version = "0.3" }
 
 [target.'cfg(any(unix, windows))'.dev-dependencies]
