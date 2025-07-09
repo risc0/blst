@@ -4,39 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
- #ifdef __ZKVM__
- #include "risczero_utils.h"
-
- #ifdef __RISC0_UNCHECKED__
- extern void risc0_bigint_modmul_256_unchecked(const limb_t*, const limb_t*,
-     const limb_t*, limb_t*);
- extern void risc0_bigint_modmul_384_unchecked(const limb_t*, const limb_t*,
-     const limb_t*, limb_t*);
- extern void risc0_bigint_modinv_256_unchecked(const limb_t*, const limb_t*,
-     limb_t*);
- extern void risc0_bigint_modinv_384_unchecked(const limb_t*, const limb_t*,
-     limb_t*);
- #define r0bigint_modmul_256 risc0_bigint_modmul_256_unchecked
- #define r0bigint_modmul_384 risc0_bigint_modmul_384_unchecked
- #define r0bigint_modinv_256 risc0_bigint_modinv_256_unchecked
- #define r0bigint_modinv_384 risc0_bigint_modinv_384_unchecked
- #else // __RISC0_UNCHECKED__
- extern void risc0_bigint_modmul_256(const limb_t*, const limb_t*,
-     const limb_t*, limb_t*);
- extern void risc0_bigint_modmul_384(const limb_t*, const limb_t*,
-     const limb_t*, limb_t*);
- extern void risc0_bigint_modinv_256(const limb_t*, const limb_t*,
-     limb_t*);
- extern void risc0_bigint_modinv_384(const limb_t*, const limb_t*,
-     limb_t*);
- #define r0bigint_modmul_256 risc0_bigint_modmul_256
- #define r0bigint_modmul_384 risc0_bigint_modmul_384
- #define r0bigint_modinv_256 risc0_bigint_modinv_256
- #define r0bigint_modinv_384 risc0_bigint_modinv_384
- #endif // __RISC0_UNCHECKED__
-
-#endif //__ZKVM__
-
 #include "fields.h"
 #include "risc0.h"
 

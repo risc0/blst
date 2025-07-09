@@ -93,12 +93,9 @@ static void mul_mont_n(limb_t ret[], const limb_t a[], const limb_t b[],
 #ifdef __R0VM__
 ALWAYS_INLINE void mul_mont_256(vec256 ret, const vec256 a, const vec256 b,
                                 const vec256 p, limb_t n0) {
-    if (n0 == r0) { // r0 is BLS12_381_r's n0
-        risc0_modmul_256_unchecked(a, b, p, ret);
-        risc0_modmul_256(ret, BLS12_381_r_R_INV, p, ret);
-    } else {
-        mul_mont_n(ret, a, b, p, n0, NLIMBS(256));
-    }
+    ENSURE(p == BLS12_381_r && n0 == r0);
+    risc0_modmul_256_unchecked(a, b, p, ret);
+    risc0_modmul_256(ret, BLS12_381_r_R_INV, p, ret);
 }
 ALWAYS_INLINE void sqr_mont_256(vec256 ret, const vec256 a, const vec256 p,
                                 limb_t n0) {
@@ -106,12 +103,9 @@ ALWAYS_INLINE void sqr_mont_256(vec256 ret, const vec256 a, const vec256 p,
 }
 ALWAYS_INLINE void mul_mont_384(vec384 ret, const vec384 a, const vec384 b,
                                 const vec384 p, limb_t n0) {
-    if (n0 == p0) { // p0 is BLS12_381_P's n0
-        risc0_modmul_384_unchecked(a, b, p, ret);
-        risc0_modmul_384(ret, BLS12_381_P_R_INV, p, ret);
-    } else {
-        mul_mont_n(ret, a, b, p, n0, NLIMBS(384));
-    }
+    ENSURE(p == BLS12_381_P && n0 == p0);
+    risc0_modmul_384_unchecked(a, b, p, ret);
+    risc0_modmul_384(ret, BLS12_381_P_R_INV, p, ret);
 }
 ALWAYS_INLINE void sqr_mont_384(vec384 ret, const vec384 a, const vec384 p,
                                 limb_t n0) {
@@ -539,19 +533,13 @@ inline void from_mont_##bits(vec##bits ret, const vec##bits a, \
 #ifdef __R0VM__
 ALWAYS_INLINE void from_mont_256(vec256 ret, const vec256 a, const vec256 p,
                                  limb_t n0) {
-    if (n0 == r0) { // r0 is BLS12_381_r's n0
-        risc0_modmul_256(a, BLS12_381_r_R_INV, p, ret);
-    } else {
-        from_mont_n(ret, a, p, n0, NLIMBS(256));
-    }
+    ENSURE(p == BLS12_381_r && n0 == r0);
+    risc0_modmul_256(a, BLS12_381_r_R_INV, p, ret);
 }
 ALWAYS_INLINE void from_mont_384(vec384 ret, const vec384 a, const vec384 p,
                                  limb_t n0) {
-    if (n0 == p0) { // p0 is BLS12_381_P's n0
-        risc0_modmul_384(a, BLS12_381_P_R_INV, p, ret);
-    } else {
-        from_mont_n(ret, a, p, n0, NLIMBS(384));
-    }
+    ENSURE(p == BLS12_381_P && n0 == p0);
+    risc0_modmul_384(a, BLS12_381_P_R_INV, p, ret);
 }
 #else  // __R0VM__
 FROM_MONT_IMPL(256)
@@ -647,11 +635,8 @@ RSHIFT_MOD_IMPL(384)
 #ifdef __R0VM__
 ALWAYS_INLINE void div_by_2_mod_384(vec384 ret, const vec384 a,
                                     const vec384 p) {
-    if (p == BLS12_381_P) {
-        risc0_modmul_384(a, TWO_INV_384, p, ret);
-    } else {
-        rshift_mod_n(ret, a, 1, p, NLIMBS(384));
-    }
+    ENSURE(p == BLS12_381_P);
+    risc0_modmul_384(a, TWO_INV_384, p, ret);
 }
 #else // __R0VM__
 #define DIV_BY_2_MOD_IMPL(bits) \
@@ -744,15 +729,12 @@ static void mul_mont_384x_c_impl(vec384x ret, const vec384x a, const vec384x b,
 #ifdef __R0VM__
 ALWAYS_INLINE void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b,
                                  const vec384 p, limb_t n0) {
-    if (p == BLS12_381_P && n0 == p0) {
-        vec384x tmp;
-        risc0_xxone_mul_384_unchecked((const limb_t*)a, (const limb_t*)b,
-                                      BLS12_381_P, BLS12_381_PP, (limb_t*)tmp);
-        risc0_modmul_384(tmp[0], BLS12_381_P_R_INV, BLS12_381_P, ret[0]);
-        risc0_modmul_384(tmp[1], BLS12_381_P_R_INV, BLS12_381_P, ret[1]);
-    } else {
-        mul_mont_384x_c_impl(ret, a, b, p, n0);
-    }
+    ENSURE(p == BLS12_381_P && n0 == p0);
+    vec384x tmp;
+    risc0_xxone_mul_384_unchecked((const limb_t*)a, (const limb_t*)b,
+                                  BLS12_381_P, BLS12_381_PP, (limb_t*)tmp);
+    risc0_modmul_384(tmp[0], BLS12_381_P_R_INV, BLS12_381_P, ret[0]);
+    risc0_modmul_384(tmp[1], BLS12_381_P_R_INV, BLS12_381_P, ret[1]);
 }
 #else  // __R0VM__
 inline void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b,
@@ -823,18 +805,15 @@ ALWAYS_INLINE void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count,
                                       const vec384 p, limb_t n0,
                                       const vec384 b) {
     __builtin_assume(count != 0);
-    if (n0 == p0) {
-        risc0_modmul_384_unchecked(a, a, p, ret);
+    ENSURE(p == BLS12_381_P && n0 == p0);
+    risc0_modmul_384_unchecked(a, a, p, ret);
+    risc0_modmul_384_unchecked(ret, BLS12_381_P_R_INV, p, ret);
+    while (--count) {
+        risc0_modmul_384_unchecked(ret, ret, p, ret);
         risc0_modmul_384_unchecked(ret, BLS12_381_P_R_INV, p, ret);
-        while (--count) {
-            risc0_modmul_384_unchecked(ret, ret, p, ret);
-            risc0_modmul_384_unchecked(ret, BLS12_381_P_R_INV, p, ret);
-        }
-        risc0_modmul_384_unchecked(ret, b, p, ret);
-        risc0_modmul_384(ret, BLS12_381_P_R_INV, p, ret);
-    } else {
-        sqr_n_mul_mont_383_c_impl(ret, a, count, p, n0, b);
     }
+    risc0_modmul_384_unchecked(ret, b, p, ret);
+    risc0_modmul_384(ret, BLS12_381_P_R_INV, p, ret);
 }
 #else  // __R0VM__
 inline void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count,
@@ -1408,14 +1387,7 @@ inline limb_t quot_rem_64(limb_t *div_rem, const limb_t *divisor,
 /*
  * Unlock reference implementations in vect.c
  */
-#ifdef __R0VM__
-ALWAYS_INLINE void mul_by_8_mod_384(vec384 ret, const vec384 a,
-                                    const vec384 p) {
-    lshift_mod_384(ret, a, 3, p);
-}
-#else // __R0VM__
 #define mul_by_8_mod_384 mul_by_8_mod_384
-#endif // __R0VM__
 #define mul_by_8_mod_384x mul_by_8_mod_384x
 #define mul_by_3_mod_384x mul_by_3_mod_384x
 #define mul_by_1_plus_i_mod_384x mul_by_1_plus_i_mod_384x
@@ -1423,8 +1395,8 @@ ALWAYS_INLINE void mul_by_8_mod_384(vec384 ret, const vec384 a,
 #define sub_mod_384x sub_mod_384x
 #define lshift_mod_384x lshift_mod_384x
 #ifdef __R0VM__
-ALWAYS_INLINE void sqr_mont_384x(vec384x ret, const vec384x a, const vec384 p,
-                                 limb_t n0) {
+inline void sqr_mont_384x(vec384x ret, const vec384x a, const vec384 p,
+                          limb_t n0) {
     mul_mont_384x(ret, a, a, p, n0);
 }
 #else // __R0VM__
@@ -1444,8 +1416,8 @@ static inline unsigned int to_be(unsigned int x) {
 #endif
 }
 
-ALWAYS_INLINE void
-blst_sha256_block_data_order(unsigned int* v, const void* inp, size_t blocks) {
+void blst_sha256_block_data_order(unsigned int* v, const void* inp,
+                                  size_t blocks) {
     size_t i;
 
     /* convert to big endian from the target’s endianness */
