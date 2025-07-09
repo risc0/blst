@@ -1,7 +1,6 @@
 #ifndef __BLS12_381_ASM_RISC0_H__
 #define __BLS12_381_ASM_RISC0_H__
 
-#ifdef __R0VM__
 #include "vect.h"
 
 #if defined(_MSC_VER)
@@ -13,14 +12,6 @@
 #define ALWAYS_INLINE inline
 #endif
 
-extern void risc0_bigint_modadd_256_unchecked(const limb_t*, const limb_t*,
-                                              const limb_t*, limb_t*);
-extern void risc0_bigint_modadd_384_unchecked(const limb_t*, const limb_t*,
-                                              const limb_t*, limb_t*);
-extern void risc0_bigint_modsub_256_unchecked(const limb_t*, const limb_t*,
-                                              const limb_t*, limb_t*);
-extern void risc0_bigint_modsub_384_unchecked(const limb_t*, const limb_t*,
-                                              const limb_t*, limb_t*);
 extern void risc0_bigint_modmul_256_unchecked(const limb_t*, const limb_t*,
                                               const limb_t*, limb_t*);
 extern void risc0_bigint_modmul_384_unchecked(const limb_t*, const limb_t*,
@@ -31,10 +22,6 @@ extern void risc0_bigint_modinv_384_unchecked(const limb_t*, const limb_t*,
                                               limb_t*);
 extern void risc0_bigint_extfield_xxone_mul_384_unchecked(
     const limb_t*, const limb_t*, const limb_t*, const limb_t*, limb_t*);
-#define risc0_modadd_256_unchecked risc0_bigint_modadd_256_unchecked
-#define risc0_modadd_384_unchecked risc0_bigint_modadd_384_unchecked
-#define risc0_modsub_256_unchecked risc0_bigint_modsub_256_unchecked
-#define risc0_modsub_384_unchecked risc0_bigint_modsub_384_unchecked
 #define risc0_modmul_256_unchecked risc0_bigint_modmul_256_unchecked
 #define risc0_modmul_384_unchecked risc0_bigint_modmul_384_unchecked
 #define risc0_modinv_256_unchecked risc0_bigint_modinv_256_unchecked
@@ -74,6 +61,17 @@ extern void sys_sha_buffer(unsigned int* out_state,
                            const unsigned char* buf, unsigned int count);
 #define risc0_sha256_buffer sys_sha_buffer
 
+extern void sys_panic(const void* msg_ptr, unsigned int len);
+
+// This macro ensures a condition is true, otherwise it panics.
+// It's active in all build modes, including release.
+#define ENSURE(condition)                                                      \
+    do {                                                                       \
+        if (!(condition)) {                                                    \
+            sys_panic((const unsigned char*)"unreachable", 11);                \
+        }                                                                      \
+    } while (0)
+
 // Montgomery constant R^-1 mod r (for the 256-bit scalar field r)
 extern const vec256 BLS12_381_r_R_INV;
 // Montgomery constant R^-1 mod P (for the 384-bit prime field P)
@@ -87,5 +85,4 @@ extern const vec256 THREE_256;
 extern const vec384 THREE_384;
 extern const vec384 TWO_INV_384;
 
-#endif //__R0VM__
 #endif // __BLS12_381_ASM_RISC0_H__
