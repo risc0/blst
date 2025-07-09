@@ -693,7 +693,7 @@ inline limb_t sgn0_pty_mont_384(const vec384 a, const vec384 p, limb_t n0)
 {
     vec384 tmp;
 
-    from_mont_n(tmp, a, p, n0, NLIMBS(384));
+    from_mont_384(tmp, a, p, n0);
 
     return sgn0_pty_mod_n(tmp, p, NLIMBS(384));
 }
@@ -720,8 +720,8 @@ inline limb_t sgn0_pty_mont_384x(const vec384x a, const vec384 p, limb_t n0)
 {
     vec384x tmp;
 
-    from_mont_n(tmp[0], a[0], p, n0, NLIMBS(384));
-    from_mont_n(tmp[1], a[1], p, n0, NLIMBS(384));
+    from_mont_384(tmp[0], a[0], p, n0);
+    from_mont_384(tmp[1], a[1], p, n0);
 
     return sgn0_pty_mod_384x(tmp, p);
 }
