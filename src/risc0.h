@@ -32,20 +32,12 @@ extern void risc0_bigint_modmul_256(const limb_t*, const limb_t*, const limb_t*,
                                     limb_t*);
 extern void risc0_bigint_modmul_384(const limb_t*, const limb_t*, const limb_t*,
                                     limb_t*);
-extern void risc0_bigint_modinv_256(const limb_t*, const limb_t*, limb_t*);
-extern void risc0_bigint_modinv_384(const limb_t*, const limb_t*, limb_t*);
-extern void risc0_bigint_extfield_xxone_mul_384(const limb_t*, const limb_t*,
-                                                const limb_t*, const limb_t*,
-                                                limb_t*);
 #define risc0_modadd_256 risc0_bigint_modadd_256
 #define risc0_modadd_384 risc0_bigint_modadd_384
 #define risc0_modsub_256 risc0_bigint_modsub_256
 #define risc0_modsub_384 risc0_bigint_modsub_384
 #define risc0_modmul_256 risc0_bigint_modmul_256
 #define risc0_modmul_384 risc0_bigint_modmul_384
-#define risc0_modinv_256 risc0_bigint_modinv_256
-#define risc0_modinv_384 risc0_bigint_modinv_384
-#define risc0_xxone_mul_384 risc0_bigint_extfield_xxone_mul_384
 
 extern void sys_sha_buffer(unsigned int* out_state,
                            const unsigned int* in_state,

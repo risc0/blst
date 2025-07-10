@@ -312,24 +312,20 @@ static void lshift_mod_n(limb_t ret[], const limb_t a[], size_t count,
 #ifdef __R0VM__
 inline void lshift_mod_256(vec256 ret, const vec256 a, size_t count,
                            const vec256 p) {
-    if (count < LIMB_T_BITS) {
-        const vec256 rhs = {TO_LIMB_T(1ull << count), TO_LIMB_T(0ull),
-                            TO_LIMB_T(0ull), TO_LIMB_T(0ull)};
-        risc0_modmul_256(a, rhs, p, ret);
-    } else {
-        lshift_mod_n(ret, a, count, p, NLIMBS(256));
-    }
+    /* this accelerated implementation is only valid for shifts <= 64 bits */
+    ENSURE(count < 64);
+    const vec256 rhs = {TO_LIMB_T(1ull << count), TO_LIMB_T(0ull),
+                        TO_LIMB_T(0ull), TO_LIMB_T(0ull)};
+    risc0_modmul_256(a, rhs, p, ret);
 }
 inline void lshift_mod_384(vec384 ret, const vec384 a, size_t count,
                            const vec384 p) {
-    if (count < LIMB_T_BITS) {
-        const vec384 rhs = {TO_LIMB_T(1ull << count), TO_LIMB_T(0ull),
-                            TO_LIMB_T(0ull),          TO_LIMB_T(0ull),
-                            TO_LIMB_T(0ull),          TO_LIMB_T(0ull)};
-        risc0_modmul_384(a, rhs, p, ret);
-    } else {
-        lshift_mod_n(ret, a, count, p, NLIMBS(384));
-    }
+    /* this accelerated implementation is only valid for shifts <= 64 bits */
+    ENSURE(count < 64);
+    const vec384 rhs = {TO_LIMB_T(1ull << count), TO_LIMB_T(0ull),
+                        TO_LIMB_T(0ull),          TO_LIMB_T(0ull),
+                        TO_LIMB_T(0ull),          TO_LIMB_T(0ull)};
+    risc0_modmul_384(a, rhs, p, ret);
 }
 #else // __R0VM__
 #define LSHIFT_MOD_IMPL(bits) \
@@ -779,6 +775,10 @@ void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count,
 }
 #endif // __R0VM__
 
+#ifdef __R0VM__
+/* use the more general sqr_mont_384x instead */
+#define sqr_mont_382x sqr_mont_384x
+#else  // __R0VM__
 void sqr_mont_382x(vec384x ret, const vec384x a,
                           const vec384 p, limb_t n0)
 {
@@ -830,6 +830,7 @@ void sqr_mont_382x(vec384x ret, const vec384x a,
         carry = (limb_t)(limbx >> LIMB_T_BITS);
     }
 }
+#endif // __R0VM__
 
 #if defined(__GNUC__) || defined(__clang__)
 # define MSB(x) ({ limb_t ret = (x) >> (LIMB_T_BITS-1); launder(ret); ret; })
