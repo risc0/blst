@@ -91,20 +91,24 @@ static void mul_mont_n(limb_t ret[], const limb_t a[], const limb_t b[],
 #define sqr_mont_256 sqr_mont_sparse_256
 
 #ifdef __R0VM__
-inline void mul_mont_256(vec256 ret, const vec256 a, const vec256 b, const vec256 p, limb_t n0) {
+inline void mul_mont_256(vec256 ret, const vec256 a, const vec256 b,
+                         const vec256 p, limb_t n0) {
     ENSURE(p == BLS12_381_r && n0 == r0);
     risc0_modmul_256_unchecked(a, b, p, ret);
     risc0_modmul_256(ret, BLS12_381_r_R_INV, p, ret);
 }
-inline void sqr_mont_256(vec256 ret, const vec256 a, const vec256 p, limb_t n0) {
+inline void sqr_mont_256(vec256 ret, const vec256 a, const vec256 p,
+                         limb_t n0) {
     mul_mont_256(ret, a, a, p, n0);
 }
-inline void mul_mont_384(vec384 ret, const vec384 a, const vec384 b, const vec384 p, limb_t n0) {
+inline void mul_mont_384(vec384 ret, const vec384 a, const vec384 b,
+                         const vec384 p, limb_t n0) {
     ENSURE(p == BLS12_381_P && n0 == p0);
     risc0_modmul_384_unchecked(a, b, p, ret);
     risc0_modmul_384(ret, BLS12_381_P_R_INV, p, ret);
 }
-inline void sqr_mont_384(vec384 ret, const vec384 a, const vec384 p, limb_t n0) {
+inline void sqr_mont_384(vec384 ret, const vec384 a, const vec384 p,
+                         limb_t n0) {
     mul_mont_384(ret, a, a, p, n0);
 }
 #else // __R0VM__
@@ -152,10 +156,12 @@ static void add_mod_n(limb_t ret[], const limb_t a[], const limb_t b[],
 }
 
 #ifdef __R0VM__
-inline void add_mod_256(vec256 ret, const vec256 a, const vec256 b, const vec256 p) {
+inline void add_mod_256(vec256 ret, const vec256 a, const vec256 b,
+                        const vec256 p) {
     risc0_modadd_256(a, b, p, ret);
 }
-inline void add_mod_384(vec384 ret, const vec384 a, const vec384 b, const vec384 p) {
+inline void add_mod_384(vec384 ret, const vec384 a, const vec384 b,
+                        const vec384 p) {
     risc0_modadd_384(a, b, p, ret);
 }
 #else // __R0VM__
@@ -192,10 +198,12 @@ static void sub_mod_n(limb_t ret[], const limb_t a[], const limb_t b[],
 }
 
 #ifdef __R0VM__
-inline void sub_mod_256(vec256 ret, const vec256 a, const vec256 b, const vec256 p) {
+inline void sub_mod_256(vec256 ret, const vec256 a, const vec256 b,
+                        const vec256 p) {
     risc0_modsub_256(a, b, p, ret);
 }
-inline void sub_mod_384(vec384 ret, const vec384 a, const vec384 b, const vec384 p) {
+inline void sub_mod_384(vec384 ret, const vec384 a, const vec384 b,
+                        const vec384 p) {
     risc0_modsub_384(a, b, p, ret);
 }
 #else // __R0VM__
@@ -302,7 +310,8 @@ static void lshift_mod_n(limb_t ret[], const limb_t a[], size_t count,
 }
 
 #ifdef __R0VM__
-inline void lshift_mod_256(vec256 ret, const vec256 a, size_t count, const vec256 p) {
+inline void lshift_mod_256(vec256 ret, const vec256 a, size_t count,
+                           const vec256 p) {
     if (count < LIMB_T_BITS) {
         const vec256 rhs = {TO_LIMB_T(1ull << count), TO_LIMB_T(0ull),
                             TO_LIMB_T(0ull), TO_LIMB_T(0ull)};
@@ -311,7 +320,8 @@ inline void lshift_mod_256(vec256 ret, const vec256 a, size_t count, const vec25
         lshift_mod_n(ret, a, count, p, NLIMBS(256));
     }
 }
-inline void lshift_mod_384(vec384 ret, const vec384 a, size_t count, const vec384 p) {
+inline void lshift_mod_384(vec384 ret, const vec384 a, size_t count,
+                           const vec384 p) {
     if (count < LIMB_T_BITS) {
         const vec384 rhs = {TO_LIMB_T(1ull << count), TO_LIMB_T(0ull),
                             TO_LIMB_T(0ull),          TO_LIMB_T(0ull),
@@ -353,14 +363,16 @@ static void cneg_mod_n(limb_t ret[], const limb_t a[], bool_t flag,
 }
 
 #ifdef __R0VM__
-inline void cneg_mod_256(vec256 ret, const vec256 a, bool_t flag, const vec256 p) {
+inline void cneg_mod_256(vec256 ret, const vec256 a, bool_t flag,
+                         const vec256 p) {
     if (flag) {
         risc0_modsub_256(ZERO_256, a, p, ret);
     } else {
         vec_copy(ret, a, sizeof(vec256));
     }
 }
-inline void cneg_mod_384(vec384 ret, const vec384 a, bool_t flag, const vec384 p) {
+inline void cneg_mod_384(vec384 ret, const vec384 a, bool_t flag,
+                         const vec384 p) {
     if (flag) {
         risc0_modsub_384(ZERO_384, a, p, ret);
     } else {
@@ -490,11 +502,13 @@ inline void from_mont_##bits(vec##bits ret, const vec##bits a, \
 {   from_mont_n(ret, a, p, n0, NLIMBS(bits));   }
 
 #ifdef __R0VM__
-inline void from_mont_256(vec256 ret, const vec256 a, const vec256 p, limb_t n0) {
+inline void from_mont_256(vec256 ret, const vec256 a, const vec256 p,
+                          limb_t n0) {
     ENSURE(p == BLS12_381_r && n0 == r0);
     risc0_modmul_256(a, BLS12_381_r_R_INV, p, ret);
 }
-inline void from_mont_384(vec384 ret, const vec384 a, const vec384 p, limb_t n0) {
+inline void from_mont_384(vec384 ret, const vec384 a, const vec384 p,
+                          limb_t n0) {
     ENSURE(p == BLS12_381_P && n0 == p0);
     risc0_modmul_384(a, BLS12_381_P_R_INV, p, ret);
 }
@@ -668,7 +682,8 @@ inline limb_t sgn0_pty_mont_384x(const vec384x a, const vec384 p, limb_t n0)
 }
 
 #ifdef __R0VM__
-inline void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b, const vec384 p, limb_t n0) {
+inline void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b,
+                          const vec384 p, limb_t n0) {
     ENSURE(p == BLS12_381_P && n0 == p0);
     vec384x tmp;
     risc0_xxone_mul_384_unchecked((const limb_t*)a, (const limb_t*)b,
@@ -678,8 +693,7 @@ inline void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b, const v
 }
 #else  // __R0VM__
 void mul_mont_384x(vec384x ret, const vec384x a, const vec384x b,
-                          const vec384 p, limb_t n0)
-{
+                   const vec384 p, limb_t n0) {
     vec384 aa, bb, cc;
 
     add_mod_n(aa, a[0], a[1], p, NLIMBS(384));
@@ -740,7 +754,8 @@ static void mul_mont_nonred_n(limb_t ret[], const limb_t a[], const limb_t b[],
 }
 
 #ifdef __R0VM__
-inline void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count, const vec384 p, limb_t n0, const vec384 b) {
+inline void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count,
+                               const vec384 p, limb_t n0, const vec384 b) {
     __builtin_assume(count != 0);
     ENSURE(p == BLS12_381_P && n0 == p0);
     risc0_modmul_384_unchecked(a, a, p, ret);
@@ -754,10 +769,9 @@ inline void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count, const v
 }
 #else  // __R0VM__
 void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count,
-                        const vec384 p, limb_t n0, const vec384 b)
-{
+                        const vec384 p, limb_t n0, const vec384 b) {
     __builtin_assume(count != 0);
-    while(count--) {
+    while (count--) {
         mul_mont_nonred_n(ret, a, a, p, n0, NLIMBS(384));
         a = ret;
     }
