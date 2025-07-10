@@ -3,15 +3,6 @@
 
 #include "vect.h"
 
-#if defined(_MSC_VER)
-#define ALWAYS_INLINE __forceinline
-#elif defined(__GNUC__) || defined(__clang__)
-#define ALWAYS_INLINE __attribute__((always_inline)) inline
-// Fallback for other compilers (just use standard inline)
-#else
-#define ALWAYS_INLINE inline
-#endif
-
 extern void risc0_bigint_modmul_256_unchecked(const limb_t*, const limb_t*,
                                               const limb_t*, limb_t*);
 extern void risc0_bigint_modmul_384_unchecked(const limb_t*, const limb_t*,
@@ -61,7 +52,7 @@ extern void sys_sha_buffer(unsigned int* out_state,
                            const unsigned char* buf, unsigned int count);
 #define risc0_sha256_buffer sys_sha_buffer
 
-extern void sys_panic(const void* msg_ptr, unsigned int len);
+extern void sys_panic(const unsigned char* msg_ptr, unsigned int len);
 
 // This macro ensures a condition is true, otherwise it panics.
 // It's active in all build modes, including release.
