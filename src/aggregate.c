@@ -36,10 +36,6 @@
  *   blst_pairing_finalverify(pk[0], gtsig);
  */
 
-#ifdef __RISC0_UNCHECKED__
-#include "risczero_utils.h"
-#endif
-
 #ifndef N_MAX
 # define N_MAX 8
 #endif
@@ -500,12 +496,8 @@ static bool_t PAIRING_FinalVerify(const PAIRING *ctx, const vec384fp12 GTsig)
     final_exp(GT, GT);
 
     /* return GT==1 */
-    bool_t r = vec_is_equal(GT[0][0], BLS12_381_Rx.p2, sizeof(GT[0][0])) &
-               vec_is_zero(GT[0][1], sizeof(GT) - sizeof(GT[0][0]));
-#ifdef __RISC0_UNCHECKED__ // bigint2 soundness: must succeed
-    _must_assume(1 == r);
-#endif
-   return r;
+    return vec_is_equal(GT[0][0], BLS12_381_Rx.p2, sizeof(GT[0][0])) &
+           vec_is_zero(GT[0][1], sizeof(GT) - sizeof(GT[0][0]));
 }
 
 int blst_pairing_finalverify(const PAIRING *ctx, const vec384fp12 GTsig)
@@ -521,12 +513,8 @@ int blst_fp12_finalverify(const vec384fp12 GT1, const vec384fp12 GT2)
     final_exp(GT, GT);
 
     /* return GT==1 */
-    int r = (int)(vec_is_equal(GT[0][0], BLS12_381_Rx.p2, sizeof(GT[0][0])) &
-                  vec_is_zero(GT[0][1], sizeof(GT) - sizeof(GT[0][0])));
-#ifdef __RISC0_UNCHECKED__ // bigint2 soundness: must succeed
-    _must_assume(1 == r);
-#endif
-   return r;
+    return (int)(vec_is_equal(GT[0][0], BLS12_381_Rx.p2, sizeof(GT[0][0])) &
+                 vec_is_zero(GT[0][1], sizeof(GT) - sizeof(GT[0][0])));
 }
 
 void blst_pairing_raw_aggregate(PAIRING *ctx, const POINTonE2_affine *q,
