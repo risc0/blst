@@ -776,8 +776,11 @@ void sqr_n_mul_mont_383(vec384 ret, const vec384 a, size_t count,
 #endif // __R0VM__
 
 #ifdef __R0VM__
-/* use the more general sqr_mont_384x instead */
-#define sqr_mont_382x sqr_mont_384x
+inline void sqr_mont_382x(vec384x ret, const vec384x a, const vec384 p,
+                          limb_t n0) {
+    /* use the more general 384x version instead */
+    mul_mont_384x(ret, a, a, p, n0);
+}
 #else  // __R0VM__
 void sqr_mont_382x(vec384x ret, const vec384x a,
                           const vec384 p, limb_t n0)
