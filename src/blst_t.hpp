@@ -87,6 +87,36 @@ public:
     }
     inline blst_384_t(int a) : blst_384_t((uint64_t)a) {}
 
+#if defined(__CUDACC__) || defined(__HIPCC__)
+# if __cplusplus < 201402L && _MSVC_LANG-0 < 201402L
+#  error "C++ >= 14 is required to compile <blst>/src/blst_t.hpp for CUDA"
+# endif
+    template<typename... Ts>
+    constexpr blst_384_t(limb_t a0, Ts... arr)
+    {
+        limb_t temp[11] = {arr...};
+
+        if (sizeof...(arr) < 6) {
+            val[0] = a0;
+            val[1] = temp[0];
+            val[2] = temp[1];
+            val[3] = temp[2];
+            val[4] = temp[3];
+            val[5] = temp[4];
+        } else {
+            val[0] = a0      | (temp[0] << 32);
+            val[1] = temp[1] | (temp[2] << 32);
+            val[2] = temp[3] | (temp[4] << 32);
+            val[3] = temp[5] | (temp[6] << 32);
+            val[4] = temp[7] | (temp[8] << 32);
+            val[5] = temp[9] | (temp[10] << 32);
+        }
+    }
+#else
+    template<typename... Ts>
+    constexpr blst_384_t(limb_t a0, Ts... arr) : val{a0, arr...} {}
+#endif
+
     inline void to_scalar(pow_t& scalar) const
     {
         const union {
@@ -276,7 +306,6 @@ public:
     inline blst_384_t& operator/=(const blst_384_t& a)
     {   return *this *= a.reciprocal();   }
 
-#ifndef NDEBUG
     inline blst_384_t(const char *hexascii)
     {   limbs_from_hexascii(val, sizeof(val), hexascii); to();   }
 
@@ -285,8 +314,8 @@ public:
     friend inline bool operator!=(const blst_384_t& a, const blst_384_t& b)
     {   return !vec_is_equal(a, b, sizeof(vec384));   }
 
-# if defined(_GLIBCXX_IOSTREAM) || defined(_IOSTREAM_) // non-standard
-    friend std::ostream& operator<<(std::ostream& os, const blst_384_t& obj)
+    template<class OStream, typename Traits = typename OStream::traits_type>
+    friend OStream& operator<<(OStream& os, const blst_384_t& obj)
     {
         unsigned char be[sizeof(obj)];
         char buf[2+2*sizeof(obj)+1], *str = buf;
@@ -296,12 +325,10 @@ public:
         *str++ = '0', *str++ = 'x';
         for (size_t i = 0; i < sizeof(obj); i++)
             *str++ = hex_from_nibble(be[i]>>4), *str++ = hex_from_nibble(be[i]);
-	*str = '\0';
+        *str = '\0';
 
         return os << buf;
     }
-# endif
-#endif
 };
 
 template<const size_t N, const vec256 MOD, const limb_t M0,
@@ -337,6 +364,32 @@ public:
         if (a) to();
     }
     inline blst_256_t(int a) : blst_256_t((uint64_t)a) {}
+
+#if defined(__CUDACC__) || defined(__HIPCC__)
+# if __cplusplus < 201402L && _MSVC_LANG-0 < 201402L
+#  error "C++ >= 14 is required to compile <blst>/src/blst_t.hpp for CUDA"
+# endif
+    template<typename... Ts>
+    constexpr blst_256_t(limb_t a0, Ts... arr)
+    {
+        limb_t temp[7] = {arr...};
+
+        if (sizeof...(arr) < 4) {
+            val[0] = a0;
+            val[1] = temp[0];
+            val[2] = temp[1];
+            val[3] = temp[2];
+        } else {
+            val[0] = a0      | (temp[0] << 32);
+            val[1] = temp[1] | (temp[2] << 32);
+            val[2] = temp[3] | (temp[4] << 32);
+            val[3] = temp[5] | (temp[6] << 32);
+        }
+    }
+#else
+    template<typename... Ts>
+    constexpr blst_256_t(limb_t a0, Ts... arr) : val{a0, arr...} {}
+#endif
 
     inline void to_scalar(pow_t& scalar) const
     {
@@ -463,7 +516,7 @@ public:
 
     inline blst_256_t& operator>>=(unsigned r)
     {   lshift_mod_256(val, val, r, MOD);           return *this;   }
-    friend inline blst_256_t operator>>(blst_256_t a, unsigned r)
+    friend inline blst_256_t operator>>(const blst_256_t& a, unsigned r)
     {
         blst_256_t ret;
         lshift_mod_256(ret, a, r, MOD);
@@ -594,7 +647,6 @@ public:
     inline blst_256_t& operator/=(const blst_256_t& a)
     {   return *this *= a.reciprocal();   }
 
-#ifndef NDEBUG
     inline blst_256_t(const char *hexascii)
     {   limbs_from_hexascii(val, sizeof(val), hexascii); to();   }
 
@@ -603,8 +655,8 @@ public:
     friend inline bool operator!=(const blst_256_t& a, const blst_256_t& b)
     {   return !vec_is_equal(a, b, sizeof(vec256));   }
 
-# if defined(_GLIBCXX_IOSTREAM) || defined(_IOSTREAM_) // non-standard
-    friend std::ostream& operator<<(std::ostream& os, const blst_256_t& obj)
+    template<class OStream, typename Traits = typename OStream::traits_type>
+    friend OStream& operator<<(OStream& os, const blst_256_t& obj)
     {
         unsigned char be[sizeof(obj)];
         char buf[2+2*sizeof(obj)+1], *str=buf;
@@ -614,11 +666,9 @@ public:
         *str++ = '0', *str++ = 'x';
         for (size_t i = 0; i < sizeof(obj); i++)
             *str++ = hex_from_nibble(be[i]>>4), *str++ = hex_from_nibble(be[i]);
-	*str = '\0';
+        *str = '\0';
 
         return os << buf;
     }
-# endif
-#endif
 };
 #endif
