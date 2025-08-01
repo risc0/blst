@@ -41,6 +41,7 @@ fn main() {
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+    let target_vendor = env::var("CARGO_CFG_TARGET_VENDOR").unwrap();
     let target_family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap_or_default();
 
     let target_no_std = target_os.eq("none")
@@ -233,16 +234,12 @@ fn main() {
         cc.define("__ELF__", None);
         cc.define("SCRATCH_LIMIT", "(45 * 1024)");
     }
-    if target_os.eq("zkvm") {
-        cc.define("__ZKVM__", None);
-        // Enable precompiles that are faster but can be misused insecurely
-        //if env::var("RISC0_UNCHECKED").is_ok() {
-        //    cc.define("__RISC0_UNCHECKED__", None);
-        //}
-    }
-
-    if !cfg!(debug_assertions) {
-        cc.opt_level(2);
+    if target_os == "zkvm"
+        && target_arch == "riscv32"
+        && target_vendor == "risc0"
+    {
+        cc.define("__R0VM__", None);
+        println!("cargo:rustc-cfg=feature=\"no-threads\"");
     }
     cc.files(&file_vec).compile("blst");
 

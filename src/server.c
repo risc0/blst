@@ -30,3 +30,6 @@
 #ifndef __BLST_NO_CPUID__
 # include "cpuid.c"
 #endif
+#ifdef __R0VM__
+#include "risc0_consts.c"
+#endif
