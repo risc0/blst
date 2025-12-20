@@ -5,4 +5,4 @@ edition = "2021"
 
 [dependencies]
 risc0-wrapper-methods = { path = "methods" }
-risc0-zkvm = { version = "2.0.0", features = [ "unstable", ] }
+risc0-zkvm = { version = "3.0.0", features = [ "unstable", ] }

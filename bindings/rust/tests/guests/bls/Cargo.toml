@@ -9,4 +9,4 @@ lto = "fat"
 
 [dependencies]
 blst = { path = "../../../." }
-risc0-zkvm = { version = "2.0", default-features = false, features = ["std", "unstable"] }
+risc0-zkvm = { version = "3.0", default-features = false, features = ["std", "unstable"] }
