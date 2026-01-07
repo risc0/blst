@@ -38,8 +38,6 @@ force-adx = []
 no-threads = []
 # Add support for serializing SecretKey, not suitable for production.
 serde-secret = ["serde"]
-# Run the R0VM tests on NVIDIA GPUs using the CUDA
-cuda = ["risc0-zkvm/cuda"]
 
 [build-dependencies]
 cc = "1.0"
@@ -47,26 +45,24 @@ cc = "1.0"
 glob = "0.3"
 
 [dependencies]
-risc0-bigint2 = { version = "^1.4.2", default-features = false, features = ["unstable"] }
-serde = { version = "1.0.152", optional = true }
 zeroize = { version = "^1.1", features = ["zeroize_derive"] }
+serde = { version = "1.0.152", optional = true }
+
+[target.'cfg(all(target_os = "zkvm", target_arch = "riscv32"))'.dependencies]
+getrandom = { version = "0.2", features = ["custom"] }
+risc0-bigint2 = { version = "^1.4.11", default-features = false }
 
 [target.'cfg(not(any(target_arch="wasm32", target_os="none", target_os="unknown", target_os="uefi")))'.dependencies]
 threadpool = "^1.8.1"
 
 [dev-dependencies]
-anyhow = "1.0"
-guests = { path = "tests/guests" }
 rand = "0.8"
 rand_chacha = "0.3"
+rmp-serde = "1.1.1"
 # Uncomment if you want to execute the test suite with Rust 1.56 through 1.64.
 #byteorder = "=1.4.3"
 #rmp = "=0.8.12"
 #ppv-lite86 = "=0.2.17"
-risc0-zkvm = { version = "3.0" }
-rmp-serde = "1.1.1"
-test-log = { version = "0.2", features = ["trace"] }
-tracing-subscriber = { version = "0.3" }
 
 [target.'cfg(any(unix, windows))'.dev-dependencies]
 criterion = "0.3"
@@ -80,6 +76,3 @@ harness = false
 
 [badges]
 maintenance = { status = "actively-developed" }
-
-[patch.crates-io]
-blst = { path = "." }

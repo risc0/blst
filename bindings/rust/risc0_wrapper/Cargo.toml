@@ -1,8 +1,0 @@
-[package]
-name = "risc0-wrapper"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-risc0-wrapper-methods = { path = "methods" }
-risc0-zkvm = { version = "3.0.0", features = [ "unstable", ] }

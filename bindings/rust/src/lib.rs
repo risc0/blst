@@ -10,7 +10,8 @@
 
 extern crate alloc;
 
-#[allow(unused_imports)]
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+#[expect(unused_imports)]
 use risc0_bigint2::field as _;
 
 use alloc::boxed::Box;
