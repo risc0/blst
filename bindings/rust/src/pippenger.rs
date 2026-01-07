@@ -145,8 +145,8 @@ macro_rules! pippenger_mult_impl {
                     let s: [*const u8; 2] = [&scalars[0], ptr::null()];
 
                     unsafe {
-                        let mut scratch: Vec<u64> =
-                            Vec::with_capacity($scratch_sizeof(npoints) / 8);
+                        let mut scratch: Vec<limb_t> =
+                            Vec::with_capacity($scratch_sizeof(npoints) / NLIMBS_256);
                         #[allow(clippy::uninit_vec)]
                         scratch.set_len(scratch.capacity());
                         let mut ret = <$point>::default();
@@ -255,7 +255,7 @@ macro_rules! pippenger_mult_impl {
                     let row_sync = row_sync.clone();
 
                     pool.joined_execute(move || {
-                        let mut scratch = vec![0u64; sz << (window - 1)];
+                        let mut scratch = vec![0 as limb_t; sz << (window - 1)];
                         let mut p: [*const $point_affine; 2] =
                             [ptr::null(), ptr::null()];
                         let mut s: [*const u8; 2] = [ptr::null(), ptr::null()];

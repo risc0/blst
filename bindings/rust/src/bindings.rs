@@ -12,8 +12,25 @@ pub enum BLST_ERROR {
     BLST_PK_IS_INFINITY = 6,
     BLST_BAD_SCALAR = 7,
 }
+
 pub type byte = u8;
+
+// NOTE: The size of limb_t here must match the size in src/vect.h.
+#[cfg(all(
+    target_pointer_width = "64",
+    not(target_arch = "wasm64")
+))]
 pub type limb_t = u64;
+#[cfg(any(
+    target_pointer_width = "32",
+    target_arch = "wasm64",
+))]
+pub type limb_t = u32;
+
+pub const LIMB_T_BITS: usize = 8 * ::core::mem::size_of::<limb_t>();
+pub const NLIMBS_256: usize = 256 / LIMB_T_BITS;
+pub const NLIMBS_384: usize = 384 / LIMB_T_BITS;
+
 #[repr(C)]
 #[derive(Debug, Default, Clone, PartialEq, Eq, Zeroize)]
 #[zeroize(drop)]
@@ -48,7 +65,7 @@ fn bindgen_test_layout_blst_scalar() {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq)]
 pub struct blst_fr {
-    pub l: [limb_t; 4usize],
+    pub l: [limb_t; NLIMBS_256],
 }
 #[test]
 fn bindgen_test_layout_blst_fr() {
@@ -61,7 +78,7 @@ fn bindgen_test_layout_blst_fr() {
     );
     assert_eq!(
         ::core::mem::align_of::<blst_fr>(),
-        8usize,
+        ::core::mem::align_of::<limb_t>(),
         concat!("Alignment of ", stringify!(blst_fr))
     );
     assert_eq!(
@@ -78,7 +95,7 @@ fn bindgen_test_layout_blst_fr() {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq)]
 pub struct blst_fp {
-    pub l: [limb_t; 6usize],
+    pub l: [limb_t; NLIMBS_384],
 }
 #[test]
 fn bindgen_test_layout_blst_fp() {
@@ -91,7 +108,7 @@ fn bindgen_test_layout_blst_fp() {
     );
     assert_eq!(
         ::core::mem::align_of::<blst_fp>(),
-        8usize,
+        ::core::mem::align_of::<limb_t>(),
         concat!("Alignment of ", stringify!(blst_fp))
     );
     assert_eq!(
@@ -121,7 +138,7 @@ fn bindgen_test_layout_blst_fp2() {
     );
     assert_eq!(
         ::core::mem::align_of::<blst_fp2>(),
-        8usize,
+        ::core::mem::align_of::<limb_t>(),
         concat!("Alignment of ", stringify!(blst_fp2))
     );
     assert_eq!(
@@ -151,7 +168,7 @@ fn bindgen_test_layout_blst_fp6() {
     );
     assert_eq!(
         ::core::mem::align_of::<blst_fp6>(),
-        8usize,
+        ::core::mem::align_of::<limb_t>(),
         concat!("Alignment of ", stringify!(blst_fp6))
     );
     assert_eq!(
@@ -181,7 +198,7 @@ fn bindgen_test_layout_blst_fp12() {
     );
     assert_eq!(
         ::core::mem::align_of::<blst_fp12>(),
-        8usize,
+        ::core::mem::align_of::<limb_t>(),
         concat!("Alignment of ", stringify!(blst_fp12))
     );
     assert_eq!(
@@ -442,7 +459,7 @@ fn bindgen_test_layout_blst_p1() {
     );
     assert_eq!(
         ::core::mem::align_of::<blst_p1>(),
-        8usize,
+        ::core::mem::align_of::<limb_t>(),
         concat!("Alignment of ", stringify!(blst_p1))
     );
     assert_eq!(
@@ -493,7 +510,7 @@ fn bindgen_test_layout_blst_p1_affine() {
     );
     assert_eq!(
         ::core::mem::align_of::<blst_p1_affine>(),
-        8usize,
+        ::core::mem::align_of::<limb_t>(),
         concat!("Alignment of ", stringify!(blst_p1_affine))
     );
     assert_eq!(
@@ -596,7 +613,7 @@ fn bindgen_test_layout_blst_p2() {
     );
     assert_eq!(
         ::core::mem::align_of::<blst_p2>(),
-        8usize,
+        ::core::mem::align_of::<limb_t>(),
         concat!("Alignment of ", stringify!(blst_p2))
     );
     assert_eq!(
@@ -647,7 +664,7 @@ fn bindgen_test_layout_blst_p2_affine() {
     );
     assert_eq!(
         ::core::mem::align_of::<blst_p2_affine>(),
-        8usize,
+        ::core::mem::align_of::<limb_t>(),
         concat!("Alignment of ", stringify!(blst_p2_affine))
     );
     assert_eq!(
