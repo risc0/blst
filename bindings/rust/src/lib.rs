@@ -10,7 +10,8 @@
 
 extern crate alloc;
 
-#[allow(unused_imports)]
+#[cfg(all(target_os = "zkvm", target_arch = "riscv32"))]
+#[expect(unused_imports)]
 use risc0_bigint2::field as _;
 
 use alloc::boxed::Box;
@@ -22,7 +23,7 @@ use core::ptr;
 use zeroize::Zeroize;
 
 #[cfg(feature = "std")]
-use std::sync::{atomic::*, mpsc::channel, Arc};
+use std::sync::{atomic::*, mpsc::sync_channel, Arc};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -193,11 +194,10 @@ impl blst_fp12 {
             }
         }
 
-        let (tx, rx) = channel();
         let counter = Arc::new(AtomicUsize::new(0));
-
         let stride = core::cmp::min((n_elems + n_workers - 1) / n_workers, 16);
         n_workers = core::cmp::min((n_elems + stride - 1) / stride, n_workers);
+        let (tx, rx) = sync_channel(n_workers);
         for _ in 0..n_workers {
             let tx = tx.clone();
             let counter = counter.clone();
@@ -543,6 +543,7 @@ macro_rules! sig_variant_impl {
         $sig_ser_size:expr,
         $pk_add_or_dbl:ident,
         $pk_add_or_dbl_aff:ident,
+        $pk_cneg:ident,
         $sig_add_or_dbl:ident,
         $sig_add_or_dbl_aff:ident,
         $pk_is_inf:ident,
@@ -1045,6 +1046,14 @@ macro_rules! sig_variant_impl {
                 }
             }
 
+            pub fn sub_aggregate(&mut self, agg_pk: &AggregatePublicKey) {
+                unsafe {
+                    let mut tmp = agg_pk.clone();
+                    $pk_cneg(&mut tmp.point, true);
+                    $pk_add_or_dbl(&mut self.point, &self.point, &tmp.point);
+                }
+            }
+
             pub fn add_public_key(
                 &mut self,
                 pk: &PublicKey,
@@ -1200,11 +1209,10 @@ macro_rules! sig_variant_impl {
                 // TODO - check msg uniqueness?
 
                 let pool = mt::da_pool();
-                let (tx, rx) = channel();
                 let counter = Arc::new(AtomicUsize::new(0));
                 let valid = Arc::new(AtomicBool::new(true));
-
                 let n_workers = core::cmp::min(pool.max_count(), n_elems);
+                let (tx, rx) = sync_channel(n_workers);
                 for _ in 0..n_workers {
                     let tx = tx.clone();
                     let counter = counter.clone();
@@ -1322,11 +1330,10 @@ macro_rules! sig_variant_impl {
                 // TODO - check msg uniqueness?
 
                 let pool = mt::da_pool();
-                let (tx, rx) = channel();
                 let counter = Arc::new(AtomicUsize::new(0));
                 let valid = Arc::new(AtomicBool::new(true));
-
                 let n_workers = core::cmp::min(pool.max_count(), n_elems);
+                let (tx, rx) = sync_channel(n_workers);
                 for _ in 0..n_workers {
                     let tx = tx.clone();
                     let counter = counter.clone();
@@ -2223,6 +2230,7 @@ pub mod min_pk {
         192,
         blst_p1_add_or_double,
         blst_p1_add_or_double_affine,
+        blst_p1_cneg,
         blst_p2_add_or_double,
         blst_p2_add_or_double_affine,
         blst_p1_affine_is_inf,
@@ -2267,6 +2275,7 @@ pub mod min_sig {
         96,
         blst_p2_add_or_double,
         blst_p2_add_or_double_affine,
+        blst_p2_cneg,
         blst_p1_add_or_double,
         blst_p1_add_or_double_affine,
         blst_p2_affine_is_inf,
